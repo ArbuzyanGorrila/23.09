@@ -1,13 +1,11 @@
 import sqlite from 'sqlite3';
 
 export default class SqliteLinker {
-    /* Создаем объект базы данных */
     constructor(filename) {
         this.filename = filename;
         this.db = null;
     }
 
-    /* Подключаемся к бд */
     async connect() {
         return new Promise((resolve, reject) => {
             this.db = new sqlite.Database(this.filename, (err) => {
@@ -22,10 +20,8 @@ export default class SqliteLinker {
         });
     }
 
-    /* Выполняем sql запрос */
     async run(sql, params = []) {
         return new Promise((resolve, reject) => {
-            // function(err) оставлен намеренно, чтобы иметь доступ к this.lastID и this.changes от sqlite3
             this.db.run(sql, params, function (err) {
                 if (err) {
                     console.error('Run SQL error:', err);
@@ -40,7 +36,6 @@ export default class SqliteLinker {
         });
     }
 
-    /* Получаем одну запись */
     async get(sql, params = []) {
         return new Promise((resolve, reject) => {
             this.db.get(sql, params, (err, row) => {
@@ -54,10 +49,8 @@ export default class SqliteLinker {
         });
     }
 
-    /* Получаем все записи */
     async all(sql, params = []) {
         return new Promise((resolve, reject) => {
-            // Исправлено: вызывается db.all вместо db.get
             this.db.all(sql, params, (err, rows) => {
                 if (err) {
                     console.error('All SQL error:', err);
@@ -69,7 +62,6 @@ export default class SqliteLinker {
         });
     }
 
-    /* Закрываем бд */
     async close() {
         return new Promise((resolve, reject) => {
             if (!this.db) {
