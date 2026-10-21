@@ -20,7 +20,26 @@ export default class SqliteLinker {
         });
     }
 
+    async ensureConnected() {
+        if (!this.db) {
+            await this.connect();
+        }
+    }
+
+    createPlaceholders(values) {
+        if (!values || !values.length) return '';
+        return values.map(() => '?').join(', ');
+    }
+
+    createSetBlock(obj) {
+        const keys = Object.keys(obj).filter((k) => obj[k] !== undefined);
+        const block = keys.map((k) => `${k}=?`).join(', ');
+        const values = keys.map((k) => obj[k]);
+        return { block, values, value: values };
+    }
+
     async run(sql, params = []) {
+        await this.ensureConnected();
         return new Promise((resolve, reject) => {
             this.db.run(sql, params, function (err) {
                 if (err) {
@@ -30,6 +49,7 @@ export default class SqliteLinker {
                 }
                 resolve({
                     lastId: this.lastID,
+                    lastID: this.lastID,
                     changes: this.changes,
                 });
             });
@@ -37,6 +57,7 @@ export default class SqliteLinker {
     }
 
     async get(sql, params = []) {
+        await this.ensureConnected();
         return new Promise((resolve, reject) => {
             this.db.get(sql, params, (err, row) => {
                 if (err) {
@@ -50,6 +71,7 @@ export default class SqliteLinker {
     }
 
     async all(sql, params = []) {
+        await this.ensureConnected();
         return new Promise((resolve, reject) => {
             this.db.all(sql, params, (err, rows) => {
                 if (err) {
